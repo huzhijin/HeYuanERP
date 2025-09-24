@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>对账单</title>
+    <!-- 样式：基础与打印扩展 -->
+    <link rel="stylesheet" href="shared/common.css" />
+    <link rel="stylesheet" href="shared/print.css" />
+  </head>
+  <body>
+    <!-- 水印（可选，通过 CSS 控制显示） -->
+    <div class="watermark"></div>
+
+    <!--#include "shared/header.html"-->
+
+    <main class="doc">
+      <h1 class="doc-title">对账单</h1>
+
+      <table class="meta">
+        <tr>
+          <td>客户名称：{{ customer.name }}</td>
+          <td>账期：{{ period.start }} — {{ period.end }}</td>
+          <td>业务员：{{ salesperson }}</td>
+        </tr>
+        <tr>
+          <td>联系电话：{{ customer.phone }}</td>
+          <td>送货地址：{{ customer.address }}</td>
+          <td>对账编号：{{ doc.number }}</td>
+        </tr>
+      </table>
+
+      <table class="items">
+        <thead>
+          <tr>
+            <th style="width: 120px;">日期</th>
+            <th style="width: 160px;">单据编号</th>
+            <th>摘要</th>
+            <th style="width: 120px;" class="text-right">应收（借）</th>
+            <th style="width: 120px;" class="text-right">应付（贷）</th>
+            <th style="width: 140px;" class="text-right">余额</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ itemsTable }}
+        </tbody>
+      </table>
+
+      <table class="summary">
+        <tr>
+          <td class="text-right">期初余额：</td>
+          <td style="width: 160px;" class="text-right">{{ totals.opening }}</td>
+          <td class="text-right">本期应收合计：</td>
+          <td style="width: 160px;" class="text-right">{{ totals.debit }}</td>
+          <td class="text-right">本期应付合计：</td>
+          <td style="width: 160px;" class="text-right">{{ totals.credit }}</td>
+          <td class="text-right">期末余额：</td>
+          <td style="width: 160px; font-weight: 700;" class="text-right">{{ totals.closing }}</td>
+        </tr>
+      </table>
+
+      <div class="notes">
+        备注：{{ remarks }}
+      </div>
+    </main>
+
+    <!--#include "shared/footer.html"-->
+  </body>
+  </html>
+

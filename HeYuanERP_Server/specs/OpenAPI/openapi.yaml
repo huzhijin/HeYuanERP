@@ -1,0 +1,1163 @@
+openapi: 3.1.0
+info:
+  title: SmartSales2008 Modernized API
+  version: 0.1.0
+  summary: Plan A (.NET 8 + Vue) API template (parity with legacy)
+  description: |
+    Starter OpenAPI 3.1 spec for SmartSales2008 refactor. Replace placeholders
+    and extend paths per PRD. Uses unified response envelope and pagination.
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: https://staging-api.example.com
+    description: Staging
+  - url: http://localhost:5080
+    description: Local
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Users
+  - name: Accounts
+  - name: SalesOrders
+  - name: Deliveries
+  - name: Returns
+  - name: PurchaseOrders
+  - name: Inventory
+  - name: Invoices
+  - name: Payments
+  - name: Reports
+  - name: Print
+
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with credentials (JWT)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeLogin'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile and permissions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeUserMe'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/accounts:
+    get:
+      tags: [Accounts]
+      summary: List accounts
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - name: keyword
+          in: query
+          schema: { type: string }
+        - name: ownerId
+          in: query
+          schema: { type: string }
+        - name: active
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PagedAccountList'
+    post:
+      tags: [Accounts]
+      summary: Create account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Account'
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/accounts/{id}:
+    get:
+      tags: [Accounts]
+      summary: Get account by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Account'
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Accounts]
+      summary: Update account
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountUpdate'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Account'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/orders:
+    get:
+      tags: [SalesOrders]
+      summary: List sales orders
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - name: status
+          in: query
+          schema: { type: string, enum: [draft, confirmed, reversed] }
+        - name: accountId
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PagedOrderList'
+    post:
+      tags: [SalesOrders]
+      summary: Create sales order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Order'
+
+  /api/orders/{id}/confirm:
+    post:
+      tags: [SalesOrders]
+      summary: Confirm order
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200': { $ref: '#/components/responses/OkEnvelope' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/print/{docType}/{id}:
+    get:
+      tags: [Print]
+      summary: Download PDF printout
+      parameters:
+        - name: docType
+          in: path
+          required: true
+          schema: { type: string, enum: [order-print, delivery-print, return-print, po-print, receive-print, invoice-print, ar-statement] }
+        - $ref: '#/components/parameters/IdParam'
+        - name: template
+          in: query
+          schema: { type: string, default: default }
+      responses:
+        '200':
+          description: PDF stream
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # Deliveries
+  /api/deliveries:
+    get:
+      tags: [Deliveries]
+      summary: List deliveries
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/FromParam'
+        - $ref: '#/components/parameters/ToParam'
+        - name: orderId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PagedDeliveryList'
+    post:
+      tags: [Deliveries]
+      summary: Create delivery from order and lines
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DeliveryCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Delivery' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /api/deliveries/{id}:
+    get:
+      tags: [Deliveries]
+      summary: Get delivery by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Delivery' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/deliveries/{id}/print:
+    post:
+      tags: [Deliveries]
+      summary: Generate and retrieve delivery PDF via Print service
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: PDF stream
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # Returns
+  /api/returns:
+    get:
+      tags: [Returns]
+      summary: List returns
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/FromParam'
+        - $ref: '#/components/parameters/ToParam'
+        - name: orderId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PagedReturnList' }
+    post:
+      tags: [Returns]
+      summary: Create return
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReturnCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Return' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  # Purchase Orders
+  /api/po:
+    get:
+      tags: [PurchaseOrders]
+      summary: List purchase orders
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/FromParam'
+        - $ref: '#/components/parameters/ToParam'
+        - name: vendorId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PagedPOList' }
+    post:
+      tags: [PurchaseOrders]
+      summary: Create purchase order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/POCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PO' }
+  /api/po/{id}:
+    get:
+      tags: [PurchaseOrders]
+      summary: Get PO by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PO' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [PurchaseOrders]
+      summary: Update PO
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/POUpdate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PO' }
+  /api/po/{id}/receive:
+    post:
+      tags: [PurchaseOrders]
+      summary: Receive PO lines into stock
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/POReceiveCreate' }
+      responses:
+        '201': { $ref: '#/components/responses/OkEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  # Inventory
+  /api/inventory/summary:
+    get:
+      tags: [Inventory]
+      summary: Query inventory summary
+      parameters:
+        - name: productId
+          in: query
+          schema: { type: string }
+        - name: whse
+          in: query
+          schema: { type: string }
+        - name: loc
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/InventorySummary' }
+  /api/inventory/transactions:
+    get:
+      tags: [Inventory]
+      summary: Query inventory transactions
+      parameters:
+        - name: productId
+          in: query
+          schema: { type: string }
+        - name: whse
+          in: query
+          schema: { type: string }
+        - name: loc
+          in: query
+          schema: { type: string }
+        - $ref: '#/components/parameters/FromParam'
+        - $ref: '#/components/parameters/ToParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PagedInventoryTxnList' }
+
+  # Invoices
+  /api/invoices:
+    get:
+      tags: [Invoices]
+      summary: List invoices
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/FromParam'
+        - $ref: '#/components/parameters/ToParam'
+        - name: accountId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PagedInvoiceList' }
+    post:
+      tags: [Invoices]
+      summary: Create invoice from order or delivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvoiceCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Invoice' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /api/invoices/{id}:
+    get:
+      tags: [Invoices]
+      summary: Get invoice by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Invoice' }
+
+  # Payments
+  /api/payments:
+    get:
+      tags: [Payments]
+      summary: List payments
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/FromParam'
+        - $ref: '#/components/parameters/ToParam'
+        - name: accountId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PagedPaymentList' }
+    post:
+      tags: [Payments]
+      summary: Create payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Payment' }
+
+  # Reports
+  /api/reports/{name}/export:
+    post:
+      tags: [Reports]
+      summary: Export report snapshot (async)
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReportExportRequest' }
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ReportTask' }
+  /api/reports/tasks/{taskId}:
+    get:
+      tags: [Reports]
+      summary: Get report task status
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ReportTask' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    PageParam:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    SizeParam:
+      name: size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 20 }
+    FromParam:
+      name: from
+      in: query
+      schema: { type: string, format: date }
+    ToParam:
+      name: to
+      in: query
+      schema: { type: string, format: date }
+
+  responses:
+    OkEnvelope:
+      description: OK (empty data)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Envelope'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Conflict:
+      description: Business conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+
+  schemas:
+    Envelope:
+      type: object
+      properties:
+        code: { type: string, example: OK }
+        message: { type: string, example: success }
+        data: {}
+        traceId: { type: string, example: 4f1f9e9e-1a2b-3c4d-5e6f-1234567890ab }
+    ErrorEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            code: { type: string, example: ERR_VALIDATION }
+            message: { type: string, example: invalid request }
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  field: { type: string }
+                  message: { type: string }
+    Pagination:
+      type: object
+      properties:
+        items:
+          type: array
+          items: {}
+        page: { type: integer, minimum: 1 }
+        size: { type: integer, minimum: 1 }
+        total: { type: integer, minimum: 0 }
+
+    LoginRequest:
+      type: object
+      required: [loginId, password]
+      properties:
+        loginId: { type: string }
+        password: { type: string, format: password }
+    LoginResult:
+      type: object
+      properties:
+        token: { type: string }
+        user:
+          $ref: '#/components/schemas/User'
+        roles:
+          type: array
+          items: { type: string }
+    EnvelopeLogin:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/LoginResult'
+
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        loginId: { type: string }
+        name: { type: string }
+        permissions:
+          type: array
+          items: { type: string }
+    EnvelopeUserMe:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/User'
+
+    Account:
+      type: object
+      properties:
+        id: { type: string }
+        code: { type: string }
+        name: { type: string }
+        ownerId: { type: string }
+        taxNo: { type: string }
+        active: { type: boolean }
+        lastEventDate: { type: string, format: date-time }
+    AccountCreate:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        ownerId: { type: string }
+        taxNo: { type: string }
+        description: { type: string }
+    AccountUpdate:
+      allOf:
+        - $ref: '#/components/schemas/AccountCreate'
+    PagedAccountList:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Account'
+
+    Order:
+      type: object
+      properties:
+        id: { type: string }
+        orderNo: { type: string }
+        accountId: { type: string }
+        orderDate: { type: string, format: date }
+        currency: { type: string, example: CNY }
+        status: { type: string, enum: [draft, confirmed, reversed] }
+        remark: { type: string }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/OrderLine' }
+    OrderLine:
+      type: object
+      properties:
+        productId: { type: string }
+        qty: { type: number }
+        unitPrice: { type: number }
+        discount: { type: number, minimum: 0, maximum: 1 }
+        taxRate: { type: number, minimum: 0, maximum: 1 }
+        deliveryDate: { type: string, format: date }
+    OrderCreate:
+      type: object
+      required: [accountId, orderDate, currency, lines]
+      properties:
+        accountId: { type: string }
+        orderDate: { type: string, format: date }
+        currency: { type: string }
+        remark: { type: string }
+        lines:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [productId, qty, unitPrice]
+            properties:
+              productId: { type: string }
+              qty: { type: number, minimum: 0.0001 }
+              unitPrice: { type: number }
+              discount: { type: number, minimum: 0, maximum: 1, default: 0 }
+              taxRate: { type: number, minimum: 0, maximum: 1, default: 0.13 }
+              deliveryDate: { type: string, format: date }
+    PagedOrderList:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Order'
+
+    # Deliveries
+    Delivery:
+      type: object
+      properties:
+        id: { type: string }
+        deliveryNo: { type: string }
+        orderId: { type: string }
+        deliveryDate: { type: string, format: date }
+        status: { type: string }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/DeliveryLine' }
+    DeliveryLine:
+      type: object
+      properties:
+        productId: { type: string }
+        orderLineId: { type: string, nullable: true }
+        qty: { type: number }
+    DeliveryCreate:
+      type: object
+      required: [orderId, lines]
+      properties:
+        orderId: { type: string }
+        deliveryDate: { type: string, format: date }
+        lines:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [productId, qty]
+            properties:
+              productId: { type: string }
+              orderLineId: { type: string, nullable: true }
+              qty: { type: number, minimum: 0.0001 }
+    PagedDeliveryList:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/Delivery' }
+
+    # Returns
+    Return:
+      type: object
+      properties:
+        id: { type: string }
+        returnNo: { type: string }
+        orderId: { type: string }
+        sourceDeliveryId: { type: string, nullable: true }
+        returnDate: { type: string, format: date }
+        status: { type: string }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/ReturnLine' }
+    ReturnLine:
+      type: object
+      properties:
+        productId: { type: string }
+        qty: { type: number }
+        reason: { type: string, nullable: true }
+    ReturnCreate:
+      type: object
+      required: [orderId, lines]
+      properties:
+        orderId: { type: string }
+        sourceDeliveryId: { type: string, nullable: true }
+        returnDate: { type: string, format: date, nullable: true }
+        reason: { type: string, nullable: true }
+        lines:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [productId, qty]
+            properties:
+              productId: { type: string }
+              qty: { type: number, minimum: 0.0001 }
+              reason: { type: string, nullable: true }
+    PagedReturnList:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/Return' }
+
+    # Purchase Orders
+    PO:
+      type: object
+      properties:
+        id: { type: string }
+        poNo: { type: string }
+        vendorId: { type: string }
+        poDate: { type: string, format: date }
+        status: { type: string }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/POLine' }
+    POLine:
+      type: object
+      properties:
+        productId: { type: string }
+        qty: { type: number }
+        unitPrice: { type: number }
+    POCreate:
+      type: object
+      required: [vendorId, lines]
+      properties:
+        vendorId: { type: string }
+        poDate: { type: string, format: date }
+        lines:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [productId, qty, unitPrice]
+            properties:
+              productId: { type: string }
+              qty: { type: number, minimum: 0.0001 }
+              unitPrice: { type: number }
+    POUpdate:
+      allOf:
+        - $ref: '#/components/schemas/POCreate'
+    POReceiveCreate:
+      type: object
+      required: [lines]
+      properties:
+        lines:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [productId, qty]
+            properties:
+              productId: { type: string }
+              qty: { type: number, minimum: 0.0001 }
+              whse: { type: string, nullable: true }
+              loc: { type: string, nullable: true }
+    PagedPOList:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/PO' }
+
+    # Inventory
+    InventorySummary:
+      type: object
+      properties:
+        productId: { type: string }
+        whse: { type: string }
+        loc: { type: string }
+        onHand: { type: number }
+        reserved: { type: number }
+        available: { type: number }
+    InventoryTxn:
+      type: object
+      properties:
+        txnId: { type: string }
+        txnCode: { type: string, enum: [IN, OUT, DELIVERY, RETURN, PORECEIVE, ADJ] }
+        productId: { type: string }
+        qty: { type: number }
+        whse: { type: string }
+        loc: { type: string }
+        txnDate: { type: string, format: date-time }
+        refType: { type: string }
+        refId: { type: string }
+    PagedInventoryTxnList:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/InventoryTxn' }
+
+    # Invoices
+    Invoice:
+      type: object
+      properties:
+        id: { type: string }
+        invoiceNo: { type: string }
+        invoiceDate: { type: string, format: date }
+        accountId: { type: string }
+        orderId: { type: string, nullable: true }
+        deliveryId: { type: string, nullable: true }
+        amount: { type: number }
+        taxRate: { type: number }
+        amountWithTax: { type: number }
+        status: { type: string }
+    InvoiceCreate:
+      type: object
+      required: [sourceType, sourceId]
+      properties:
+        sourceType: { type: string, enum: [order, delivery] }
+        sourceId: { type: string }
+        invoiceDate: { type: string, format: date, nullable: true }
+    PagedInvoiceList:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/Invoice' }
+
+    # Payments
+    Payment:
+      type: object
+      properties:
+        id: { type: string }
+        accountId: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        date: { type: string, format: date }
+        method: { type: string }
+        refNo: { type: string, nullable: true }
+        voucherNo: { type: string, nullable: true }
+        status: { type: string, nullable: true }
+        remark: { type: string, nullable: true }
+    PaymentCreate:
+      type: object
+      required: [accountId, amount, currency, date, method]
+      properties:
+        accountId: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        date: { type: string, format: date }
+        method: { type: string }
+        remark: { type: string, nullable: true }
+    PagedPaymentList:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/Payment' }
+
+    # Reports
+    ReportExportRequest:
+      type: object
+      properties:
+        params:
+          type: object
+          additionalProperties: true
+    ReportTask:
+      type: object
+      properties:
+        taskId: { type: string }
+        status: { type: string, enum: [queued, running, completed, failed] }
+        fileUri: { type: string, nullable: true }
+        message: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time, nullable: true }
+

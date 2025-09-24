@@ -1,0 +1,58 @@
+### HeYuanERP API Smoke Tests (run sequentially)
+
+@base = http://localhost:5180
+@json = application/json
+
+### 1) Login (admin / CHANGE_ME)
+POST {{base}}/api/auth/login
+Content-Type: {{json}}
+
+{
+  "loginId": "admin",
+  "password": "CHANGE_ME"
+}
+
+> {% client.global.set("token", response.body.data.token); %}
+
+### 2) Accounts (protected)
+GET {{base}}/api/accounts
+Authorization: Bearer {{token}}
+
+### 3) Payments - list
+GET {{base}}/api/payments?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 4) Payments - create (multipart)
+POST {{base}}/api/payments
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary7MA4YWxkTrZu0gW
+
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="method"
+
+银行转账
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="amount"
+
+123.45
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="paymentDate"
+
+2025-09-11
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="remark"
+
+本地联调附件上传
+--WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 5) Inventory summary (reports)
+GET {{base}}/api/reports/inventory/summary?productId=&whse=&loc=
+Authorization: Bearer {{token}}
+
+### 6) Print (requires existing document id; replace 123)
+GET {{base}}/api/print/order/123?template=default
+Authorization: Bearer {{token}}
+
+### 7) Health
+GET {{base}}/health
+

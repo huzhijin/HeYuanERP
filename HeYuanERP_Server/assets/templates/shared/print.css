@@ -1,0 +1,48 @@
+/*
+ * 打印扩展样式：页眉/页脚与水印
+ */
+
+.page-header, .page-footer {
+  width: 100%;
+}
+
+.page-footer {
+  margin-top: 12px;
+}
+
+/* 水印居中旋转，打印时显示 */
+.watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 200px;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  background: url('watermark.svg') center center no-repeat;
+  background-size: contain;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 分页控制 */
+.page-break-before {
+  page-break-before: always;
+  break-before: page;
+}
+.page-break-after {
+  page-break-after: always;
+  break-after: page;
+}
+
+@media screen {
+  /* 屏幕预览弱化水印以避免干扰阅读 */
+  .watermark { opacity: 0.08; }
+}
+
+@media print {
+  /* 打印时页眉页脚靠近边界 */
+  .page-header { margin-top: -6mm; }
+  .page-footer { margin-bottom: -6mm; }
+}
+

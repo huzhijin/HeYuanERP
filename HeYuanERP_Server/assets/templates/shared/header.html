@@ -1,0 +1,21 @@
+<!--
+  共享页眉片段：
+  - 展示公司信息与打印信息；
+  - 由模板通过 <!--#include "shared/header.html"--> 引入；
+-->
+<header class="page-header">
+  <table style="width:100%; border-collapse:collapse;">
+    <tr>
+      <td>
+        <div style="font-weight:700; font-size:16px;">{{ org.name }}</div>
+        <div class="muted" style="font-size:12px;">{{ org.address }} · {{ org.phone }}</div>
+      </td>
+      <td class="text-right">
+        <div class="muted" style="font-size:12px;">打印时间：{{ print.at }}</div>
+        <div class="muted" style="font-size:12px;">打印人：{{ print.by }}</div>
+      </td>
+    </tr>
+  </table>
+  <hr style="border:none; border-top:1px solid #d0d7de; margin:6px 0;" />
+</header>
+

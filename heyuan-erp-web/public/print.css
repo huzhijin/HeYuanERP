@@ -1,0 +1,22 @@
+/* 说明：全局打印样式（中文注释）
+   用途：供浏览器与 Chromium Headless 统一使用，保证打印版式一致。
+*/
+
+@media print {
+  /* 隐藏带有 .no-print 的元素 */
+  .no-print { display: none !important; }
+
+  /* 页边距与页面设置（多数浏览器支持） */
+  @page { size: A4; margin: 12mm; }
+}
+
+/* 基础表格样式（屏幕与打印通用） */
+.print-page { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Microsoft YaHei', sans-serif; color: #111; padding: 12px; }
+table { border-collapse: collapse; width: 100%; }
+table th, table td { border: 1px solid #999; padding: 6px 8px; font-size: 12px; }
+table th { background: #f2f2f2; }
+
+/* 工具类：分页符 */
+.page-break { page-break-after: always; }
+.avoid-break { page-break-inside: avoid; }
+

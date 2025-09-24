@@ -1,0 +1,48 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# JetBrains Rider / IntelliJ
+.idea/
+*.sln.iml
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Dotnet build
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+logs/
+TestResults/
+coverage/
+
+# Packages
+*.nupkg
+*.snupkg
+packages/
+
+# Node / Frontend
+node_modules/
+dist/
+.cache/
+*.log
+
+# Env / Secrets (do not commit real values)
+.env
+.env.*.local
+
+# Misc
+*.swp
+*.tmp
+*.bak
+~$*
+
+# Generated artifacts
+wwwroot/
+coverage/
+report/
+

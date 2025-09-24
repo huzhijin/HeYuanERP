@@ -1,0 +1,27 @@
+{
+  "name": "heyuan-erp-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HeYuanERP 前端（Vue 3 + Vite + TS + Pinia + Vue Router + Ant Design Vue）",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview --port 5173",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "ant-design-vue": "^4.2.6",
+    "axios": "^1.7.7",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.38",
+    "vue-router": "^4.3.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.2",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "vue-tsc": "^2.0.26"
+  }
+}
+

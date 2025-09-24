@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>退货单</title>
+    <link rel="stylesheet" href="shared/common.css" />
+  </head>
+  <body>
+    <!--#include "shared/header.html"-->
+
+    <main class="doc">
+      <h1 class="doc-title">退货单</h1>
+
+      <table class="meta">
+        <tr>
+          <td>单据编号：{{ doc.number }}</td>
+          <td>退货日期：{{ doc.date }}</td>
+          <td>原订单号：{{ related.orderNumber }}</td>
+        </tr>
+        <tr>
+          <td>客户名称：{{ customer.name }}</td>
+          <td>联系电话：{{ customer.phone }}</td>
+          <td>退货原因：{{ reason }}</td>
+        </tr>
+      </table>
+
+      <table class="items">
+        <thead>
+          <tr>
+            <th style="width: 48px;">序号</th>
+            <th>商品名称</th>
+            <th style="width: 120px;">规格型号</th>
+            <th style="width: 80px;" class="text-right">数量</th>
+            <th style="width: 64px;">单位</th>
+            <th style="width: 110px;" class="text-right">金额</th>
+            <th style="width: 120px;">备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ itemsTable }}
+        </tbody>
+      </table>
+
+      <table class="summary">
+        <tr>
+          <td class="text-right">合计退款：</td>
+          <td style="width: 160px; font-weight: 700;" class="text-right">{{ totals.refundAmount }}</td>
+        </tr>
+      </table>
+
+      <div class="notes">
+        备注：{{ remarks }}
+      </div>
+    </main>
+
+    <!--#include "shared/footer.html"-->
+  </body>
+  </html>
+

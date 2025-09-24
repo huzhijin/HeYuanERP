@@ -1,0 +1,18 @@
+<!--
+  共享页脚片段：
+  - 签字栏与温馨提示；
+  - 由模板通过 <!--#include "shared/footer.html"--> 引入；
+-->
+<footer class="page-footer">
+  <hr style="border:none; border-top:1px solid #d0d7de; margin:8px 0 6px;" />
+  <div class="muted" style="font-size:12px; display:flex; justify-content:space-between; gap:8px;">
+    <span>制单：{{ sign.maker }}</span>
+    <span>审核：{{ sign.reviewer }}</span>
+    <span>客户签收：______________</span>
+    <span>日期：______________</span>
+  </div>
+  <div class="muted" style="font-size:12px; margin-top:4px;">
+    注：此单据由系统自动生成，仅用于业务往来及财务对账，请妥善保管。
+  </div>
+</footer>
+

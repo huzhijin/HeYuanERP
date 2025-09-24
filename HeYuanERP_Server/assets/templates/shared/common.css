@@ -1,0 +1,87 @@
+/*
+ * HeYuanERP 打印公共样式（A4 优化）
+ * 说明：所有模板均应引入本文件。
+ */
+
+@page {
+  size: A4;
+  margin: 10mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  color: #1f2328;
+  background: #fff;
+  font: 14px/1.6 "-apple-system", "Segoe UI", Roboto, "Noto Sans SC", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.doc {
+  width: 100%;
+}
+
+.doc-title {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.meta {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.meta td {
+  padding: 4px 6px;
+  vertical-align: top;
+}
+
+.items {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.items th,
+.items td {
+  border: 1px solid #d0d7de;
+  padding: 6px 8px;
+}
+
+.items th {
+  background: #f6f8fa;
+  text-align: left;
+}
+
+.summary {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.summary td {
+  padding: 4px 6px;
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.muted { color: #57606a; }
+
+.notes {
+  margin-top: 10px;
+  color: #4b5563;
+  font-size: 12px;
+}
+
+/* 打印优化 */
+@media print {
+  .no-print { display: none !important; }
+}
+

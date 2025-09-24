@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>销售订单</title>
+    <!-- 引入公共打印样式（相对路径依赖注入的 <base>） -->
+    <link rel="stylesheet" href="shared/common.css" />
+  </head>
+  <body>
+    <!--#include "shared/header.html"-->
+
+    <main class="doc">
+      <h1 class="doc-title">销售订单</h1>
+
+      <!-- 基本信息：使用通用键名，便于接口映射 -->
+      <table class="meta">
+        <tr>
+          <td>单据编号：{{ doc.number }}</td>
+          <td>单据日期：{{ doc.date }}</td>
+          <td>业务员：{{ salesperson }}</td>
+        </tr>
+        <tr>
+          <td>客户名称：{{ customer.name }}</td>
+          <td>联系电话：{{ customer.phone }}</td>
+          <td>送货地址：{{ customer.address }}</td>
+        </tr>
+      </table>
+
+      <!-- 明细表：itemsTable 期望为预渲染的 <tr>... 行集合（由后端或快照提供） -->
+      <table class="items">
+        <thead>
+          <tr>
+            <th style="width: 48px;">序号</th>
+            <th>商品名称</th>
+            <th style="width: 120px;">规格型号</th>
+            <th style="width: 80px;" class="text-right">数量</th>
+            <th style="width: 64px;">单位</th>
+            <th style="width: 96px;" class="text-right">单价</th>
+            <th style="width: 110px;" class="text-right">金额</th>
+            <th style="width: 120px;">备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ itemsTable }}
+        </tbody>
+      </table>
+
+      <!-- 汇总信息：金额等 -->
+      <table class="summary">
+        <tr>
+          <td class="text-right">小计：</td>
+          <td style="width: 140px;" class="text-right">{{ totals.subtotal }}</td>
+          <td class="text-right">税额：</td>
+          <td style="width: 140px;" class="text-right">{{ totals.tax }}</td>
+          <td class="text-right">折扣：</td>
+          <td style="width: 140px;" class="text-right">{{ totals.discount }}</td>
+          <td class="text-right">合计：</td>
+          <td style="width: 160px; font-weight: 700;" class="text-right">{{ totals.total }}</td>
+        </tr>
+      </table>
+
+      <div class="notes">
+        备注：{{ remarks }}
+      </div>
+    </main>
+
+    <!--#include "shared/footer.html"-->
+  </body>
+  </html>
+

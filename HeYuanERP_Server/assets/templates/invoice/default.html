@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>发票</title>
+    <link rel="stylesheet" href="shared/common.css" />
+  </head>
+  <body>
+    <!--#include "shared/header.html"-->
+
+    <main class="doc">
+      <h1 class="doc-title">发票（非税票样式，仅演示）</h1>
+
+      <table class="meta">
+        <tr>
+          <td>发票号码：{{ doc.number }}</td>
+          <td>开票日期：{{ doc.date }}</td>
+          <td>销售人员：{{ salesperson }}</td>
+        </tr>
+        <tr>
+          <td>购方名称：{{ customer.name }}</td>
+          <td>纳税人识别号：{{ customer.taxNo }}</td>
+          <td>联系电话：{{ customer.phone }}</td>
+        </tr>
+        <tr>
+          <td colspan="3">购方地址：{{ customer.address }}</td>
+        </tr>
+      </table>
+
+      <table class="items">
+        <thead>
+          <tr>
+            <th style="width: 48px;">序号</th>
+            <th>货物或应税劳务名称</th>
+            <th style="width: 120px;">规格型号</th>
+            <th style="width: 80px;" class="text-right">数量</th>
+            <th style="width: 64px;">单位</th>
+            <th style="width: 96px;" class="text-right">单价</th>
+            <th style="width: 110px;" class="text-right">金额</th>
+            <th style="width: 80px;" class="text-right">税率</th>
+            <th style="width: 110px;" class="text-right">税额</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ itemsTable }}
+        </tbody>
+      </table>
+
+      <table class="summary">
+        <tr>
+          <td class="text-right">合计（不含税）：</td>
+          <td style="width: 160px;" class="text-right">{{ totals.subtotal }}</td>
+          <td class="text-right">合计税额：</td>
+          <td style="width: 160px;" class="text-right">{{ totals.tax }}</td>
+          <td class="text-right">价税合计（大写）：</td>
+          <td style="width: 240px; font-weight: 700;" class="text-right">{{ totals.totalUpper }}</td>
+          <td class="text-right">（小写）：</td>
+          <td style="width: 160px; font-weight: 700;" class="text-right">{{ totals.total }}</td>
+        </tr>
+      </table>
+
+      <div class="notes">
+        备注：{{ remarks }}
+      </div>
+    </main>
+
+    <!--#include "shared/footer.html"-->
+  </body>
+  </html>
+
