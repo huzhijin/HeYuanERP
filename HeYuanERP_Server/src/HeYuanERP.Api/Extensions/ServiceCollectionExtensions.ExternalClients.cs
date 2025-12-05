@@ -18,6 +18,7 @@ namespace HeYuanERP.Api.Extensions
         /// </summary>
         public static IServiceCollection AddExternalAudit(this IServiceCollection services)
         {
+            services.AddSingleton<HeYuanERP.Infrastructure.Logging.Audit.IAuditLogger, HeYuanERP.Infrastructure.Logging.Audit.ConsoleAuditLogger>();
             services.AddTransient<AuditHttpMessageHandler>();
             return services;
         }
